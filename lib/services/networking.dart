@@ -10,7 +10,7 @@ class NetworkHelper {
     http.Response response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      String data = response.body;
+      String data = Utf8Decoder().convert(response.bodyBytes);
       return jsonDecode(data);
     } else {
       print(response.statusCode);

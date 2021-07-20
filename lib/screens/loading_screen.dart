@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:milesrank_app/screens/rankings_screen.dart';
-import 'package:milesrank_app/services/sailors.dart';
+import 'package:milesrank_app/services/rankings.dart';
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -12,18 +12,18 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   void initState() {
     super.initState();
-    getSailorsData();
+    getRankingsData();
   }
 
-  void getSailorsData() async {
-    SailorsModel sailorsModel = SailorsModel();
-    var sailorsData = await sailorsModel.getSailorsData();
+  void getRankingsData() async {
+    RankingsModel rankingsModel = RankingsModel();
+    var rankingsData = await rankingsModel.getRankingsDataFromDB();
 
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) {
         return RankingsScreen(
-          sailorsData: sailorsData,
+          rankingData: rankingsData,
         );
       }),
     );

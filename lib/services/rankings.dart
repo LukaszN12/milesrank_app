@@ -1,11 +1,11 @@
 import 'package:milesrank_app/services/networking.dart';
 
-class SailorsModel {
-  Future<dynamic> getSailorsData() async {
+class RankingsModel {
+  Future<dynamic> getRankingsDataFromDB() async {
     var url = 'https://milesrank.herokuapp.com/api/rankings/simple#';
     NetworkHelper networkHelper = NetworkHelper(url);
-    var sailorsData = await networkHelper.getData();
-    print(sailorsData);
-    return sailorsData;
+    var rankingsData = await networkHelper.getData();
+    // print(rankingsData);
+    return rankingsData;
   }
 }
