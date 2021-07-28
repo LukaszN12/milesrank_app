@@ -17,7 +17,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   void getRankingsData() async {
     RankingsModel rankingsModel = RankingsModel();
-    var rankingsData = await rankingsModel.getRankingsDataFromDB();
+    var rankingsData = await rankingsModel.getRankingsDataFromDB(1);
 
     Navigator.push(
       context,

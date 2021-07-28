@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:milesrank_app/services/ranking_item.dart';
+import 'package:milesrank_app/services/rankings.dart';
 
 class RankingsScreen extends StatefulWidget {
   final rankingData;
@@ -12,18 +13,63 @@ class RankingsScreen extends StatefulWidget {
 }
 
 class _RankingsScreenState extends State<RankingsScreen> {
+  final ScrollController _scrollController = ScrollController();
+  int jsonLength = 10;
+  int totalPages = 0;
+  int pageNumber = 1;
   List<RankingItem> rankingList = [];
-  List<String> sList = [];
+  bool loading = false, allLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    getRankingList(widget.rankingData);
+    getRankingList(widget.rankingData, rankingList);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent &&
+          !loading) {
+        pageNumber++;
+        fetchRankingData(pageNumber);
+      }
+    });
   }
 
-  void getRankingList(dynamic rData) {
-    for (int i = 0; i < 10; i++) {
-      rankingList.add(RankingItem(
+  @override
+  void dispose() {
+    super.dispose();
+    _scrollController.dispose();
+  }
+
+  fetchRankingData(int pageNumber) async {
+    if (pageNumber > totalPages) {
+      return;
+    }
+    setState(() {
+      loading = true;
+    });
+    List<RankingItem> newData = [];
+    RankingsModel rankingsModel = RankingsModel();
+    var rankingsData = await rankingsModel.getRankingsDataFromDB(pageNumber);
+    getRankingList(rankingsData, newData);
+    if (newData.isNotEmpty) {
+      rankingList.addAll(newData);
+    }
+
+    setState(() {
+      loading = false;
+      allLoaded = newData.isEmpty;
+    });
+  }
+
+  void getRankingList(dynamic rData, List list) {
+    totalPages = rData['totalPagesCount'];
+
+    if (pageNumber == totalPages) {
+      int totalItems = rData['totalItems'];
+      jsonLength = totalItems % jsonLength;
+    }
+    for (int i = 0; i < jsonLength; i++) {
+      list.add(RankingItem(
           rank: rData['items'][i]['rank'],
           firstName: rData['items'][i]['person']['firstName'],
           lastName: rData['items'][i]['person']['lastName'],
@@ -32,16 +78,7 @@ class _RankingsScreenState extends State<RankingsScreen> {
           miles: rData['items'][i]['miles'],
           debut: rData['items'][i]['debut']));
     }
-    // for (int i = 0; i < rankingList.length; i++) {
-    //   print(rankingList[i].lastName);
-    // }
-
-    // print(rData['items'][0]['person']['firstName']);
-    // sList.add(rData['items'][0]['person']['firstName']);
-    // print(sList[0]);
   }
-
-  //items[0].debut
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +89,7 @@ class _RankingsScreenState extends State<RankingsScreen> {
         elevation: 0,
       ),
       body: ListView.builder(
+          controller: _scrollController,
           itemCount: rankingList.length,
           itemBuilder: (context, index) {
             return Card(
