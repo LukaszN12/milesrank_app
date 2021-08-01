@@ -19,7 +19,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     RankingsModel rankingsModel = RankingsModel();
     var rankingsData = await rankingsModel.getRankingsDataFromDB(1);
 
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) {
         return RankingsScreen(

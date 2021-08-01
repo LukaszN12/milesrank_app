@@ -92,13 +92,18 @@ class _RankingsScreenState extends State<RankingsScreen> {
           controller: _scrollController,
           itemCount: rankingList.length,
           itemBuilder: (context, index) {
-            return Card(
-              child: ListTile(
-                onTap: () {},
-                leading: Text(rankingList[index].rank.toString()),
-                title: Text(
-                    '${rankingList[index].firstName} ${rankingList[index].lastName}'),
-                subtitle: Text('miles: ${rankingList[index].miles}'),
+            return Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),
+              child: Card(
+                elevation: 5.0,
+                child: ListTile(
+                  onTap: () {},
+                  leading: Text(rankingList[index].rank.toString()),
+                  title: Text(
+                      '${rankingList[index].firstName} ${rankingList[index].lastName}'),
+                  subtitle: Text('miles: ${rankingList[index].miles}'),
+                ),
               ),
             );
           }),
