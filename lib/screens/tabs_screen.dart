@@ -1,12 +1,10 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:milesrank_app/screens/loading_screen.dart';
 import 'package:milesrank_app/screens/map_screen.dart';
 import 'package:milesrank_app/screens/rankings_screen.dart';
 import 'package:milesrank_app/screens/sailors_screen.dart';
 import 'package:milesrank_app/screens/search_screen.dart';
-import 'package:milesrank_app/screens/test_screen.dart';
 
 class TabsScreen extends StatefulWidget {
   final rankingData;
@@ -19,7 +17,7 @@ class TabsScreen extends StatefulWidget {
 
 class _TabsScreenState extends State<TabsScreen> {
   final List<Widget> _screens = [
-    TestScreen(),
+    RankingScreen(),
     SailorsScreen(),
     SearchScreen(),
     MapScreen(),
@@ -37,8 +35,8 @@ class _TabsScreenState extends State<TabsScreen> {
         color: Color(0xFF5089C6),
         items: <Widget>[
           Icon(Icons.emoji_events, size: 30),
-          Icon(Icons.list, size: 30),
-          Icon(Icons.compare_arrows, size: 30),
+          Icon(Icons.sailing, size: 30),
+          Icon(Icons.search, size: 30),
           Icon(Icons.map, size: 30),
         ],
         onTap: (index) {

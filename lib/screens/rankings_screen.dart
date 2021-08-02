@@ -1,35 +1,76 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:milesrank_app/services/ranking_item.dart';
 import 'package:milesrank_app/services/rankings.dart';
 
-class RankingsScreen extends StatefulWidget {
-  final rankingData;
-
-  RankingsScreen({this.rankingData});
-
+class RankingScreen extends StatefulWidget {
   @override
-  _RankingsScreenState createState() => _RankingsScreenState();
+  _RankingScreenState createState() => _RankingScreenState();
 }
 
-class _RankingsScreenState extends State<RankingsScreen> {
+class _RankingScreenState extends State<RankingScreen> {
   final ScrollController _scrollController = ScrollController();
-  int jsonLength = 10;
-  int totalPages = 0;
-  int pageNumber = 1;
-  List<RankingItem> rankingList = [];
+  List<RankingItem> items = [];
   bool loading = false, allLoaded = false;
+  int pageNumber = 1;
+  int totalPages = 1;
+
+  fetchData(int pageNumber) async {
+    if (allLoaded || (pageNumber > totalPages)) {
+      return;
+    }
+
+    setState(() {
+      loading = true;
+    });
+
+    RankingsModel rankingsModel = RankingsModel();
+    var rankingData = await rankingsModel.getRankingsDataFromDB(pageNumber);
+    List<RankingItem> newData = copyJsonToList(rankingData);
+
+    // List<RankingItem> newData = items.length >= 60
+    //     ? []
+    //     : List.generate(20, (index) => "List Item ${index + items.length}");
+    if (newData.isNotEmpty) {
+      items.addAll(newData);
+    }
+    setState(() {
+      loading = false;
+      allLoaded = newData.isEmpty;
+    });
+  }
+
+  List<RankingItem> copyJsonToList(dynamic rData) {
+    List<RankingItem> newList = [];
+    totalPages = rData['totalPagesCount'];
+    int jsonLength = 10;
+
+    if (pageNumber == totalPages) {
+      int totalItems = rData['totalItems'];
+      jsonLength = totalItems % jsonLength;
+    }
+    for (int i = 0; i < jsonLength; i++) {
+      newList.add(RankingItem(
+          rank: rData['items'][i]['rank'],
+          firstName: rData['items'][i]['person']['firstName'],
+          lastName: rData['items'][i]['person']['lastName'],
+          change: rData['items'][i]['change'],
+          id: rData['items'][i]['person']['id'],
+          miles: rData['items'][i]['miles'],
+          debut: rData['items'][i]['debut']));
+    }
+    return newList;
+  }
 
   @override
   void initState() {
     super.initState();
-    getRankingList(widget.rankingData, rankingList);
+    fetchData(pageNumber);
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent &&
           !loading) {
         pageNumber++;
-        fetchRankingData(pageNumber);
+        fetchData(pageNumber);
       }
     });
   }
@@ -40,73 +81,61 @@ class _RankingsScreenState extends State<RankingsScreen> {
     _scrollController.dispose();
   }
 
-  fetchRankingData(int pageNumber) async {
-    if (pageNumber > totalPages) {
-      return;
-    }
-    setState(() {
-      loading = true;
-    });
-    List<RankingItem> newData = [];
-    RankingsModel rankingsModel = RankingsModel();
-    var rankingsData = await rankingsModel.getRankingsDataFromDB(pageNumber);
-    getRankingList(rankingsData, newData);
-    if (newData.isNotEmpty) {
-      rankingList.addAll(newData);
-    }
-
-    setState(() {
-      loading = false;
-      allLoaded = newData.isEmpty;
-    });
-  }
-
-  void getRankingList(dynamic rData, List list) {
-    totalPages = rData['totalPagesCount'];
-
-    if (pageNumber == totalPages) {
-      int totalItems = rData['totalItems'];
-      jsonLength = totalItems % jsonLength;
-    }
-    for (int i = 0; i < jsonLength; i++) {
-      list.add(RankingItem(
-          rank: rData['items'][i]['rank'],
-          firstName: rData['items'][i]['person']['firstName'],
-          lastName: rData['items'][i]['person']['lastName'],
-          change: rData['items'][i]['change'],
-          id: rData['items'][i]['person']['id'],
-          miles: rData['items'][i]['miles'],
-          debut: rData['items'][i]['debut']));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Ranking'),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: ListView.builder(
-          controller: _scrollController,
-          itemCount: rankingList.length,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),
-              child: Card(
-                elevation: 5.0,
-                child: ListTile(
-                  onTap: () {},
-                  leading: Text(rankingList[index].rank.toString()),
-                  title: Text(
-                      '${rankingList[index].firstName} ${rankingList[index].lastName}'),
-                  subtitle: Text('miles: ${rankingList[index].miles}'),
-                ),
-              ),
-            );
-          }),
+      body: LayoutBuilder(builder: (context, constraints) {
+        if (items.isNotEmpty) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Ranking'),
+              centerTitle: true,
+              elevation: 0,
+              // backgroundColor: Color(0xFF5089C6),
+            ),
+            body: Stack(children: [
+              ListView.builder(
+                  controller: _scrollController,
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 2.0, horizontal: 10.0),
+                      child: Card(
+                        elevation: 5.0,
+                        child: ListTile(
+                          onTap: () {},
+                          leading: Text(items[index].rank.toString()),
+                          title: Text(
+                              '${items[index].firstName} ${items[index].lastName}'),
+                          subtitle: Text('miles: ${items[index].miles}'),
+                        ),
+                      ),
+                    );
+                  }),
+              if (loading) ...[
+                Positioned(
+                  left: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: constraints.maxWidth,
+                    height: 80,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                )
+              ]
+            ]),
+          );
+        } else {
+          return Container(
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+      }),
     );
   }
 }
