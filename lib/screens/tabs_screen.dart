@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:milesrank_app/screens/map_screen.dart';
 import 'package:milesrank_app/screens/rankings_screen.dart';
-import 'package:milesrank_app/screens/sailors_screen.dart';
+import 'package:milesrank_app/screens/cruises_screen.dart';
 import 'package:milesrank_app/screens/search_screen.dart';
 
 class TabsScreen extends StatefulWidget {

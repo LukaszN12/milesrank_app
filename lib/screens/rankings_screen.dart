@@ -14,7 +14,7 @@ class _RankingScreenState extends State<RankingScreen> {
   int pageNumber = 1;
   int totalPages = 1;
 
-  fetchData(int pageNumber) async {
+  void fetchData(int pageNumber) async {
     if (allLoaded || (pageNumber > totalPages)) {
       return;
     }
@@ -83,59 +83,57 @@ class _RankingScreenState extends State<RankingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: LayoutBuilder(builder: (context, constraints) {
-        if (items.isNotEmpty) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('Ranking'),
-              centerTitle: true,
-              elevation: 0,
-              // backgroundColor: Color(0xFF5089C6),
-            ),
-            body: Stack(children: [
-              ListView.builder(
-                  controller: _scrollController,
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 2.0, horizontal: 10.0),
-                      child: Card(
-                        elevation: 5.0,
-                        child: ListTile(
-                          onTap: () {},
-                          leading: Text(items[index].rank.toString()),
-                          title: Text(
-                              '${items[index].firstName} ${items[index].lastName}'),
-                          subtitle: Text('miles: ${items[index].miles}'),
-                        ),
+    return LayoutBuilder(builder: (context, constraints) {
+      if (items.isNotEmpty) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Ranking'),
+            centerTitle: true,
+            elevation: 0,
+            // backgroundColor: Color(0xFF5089C6),
+          ),
+          body: Stack(children: [
+            ListView.builder(
+                controller: _scrollController,
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 2.0, horizontal: 10.0),
+                    child: Card(
+                      elevation: 5.0,
+                      child: ListTile(
+                        onTap: () {},
+                        leading: Text(items[index].rank.toString()),
+                        title: Text(
+                            '${items[index].firstName} ${items[index].lastName}'),
+                        subtitle: Text('miles: ${items[index].miles}'),
                       ),
-                    );
-                  }),
-              if (loading) ...[
-                Positioned(
-                  left: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: constraints.maxWidth,
-                    height: 80,
-                    child: Center(
-                      child: CircularProgressIndicator(),
                     ),
+                  );
+                }),
+            if (loading) ...[
+              Positioned(
+                left: 0,
+                bottom: 0,
+                child: Container(
+                  width: constraints.maxWidth,
+                  height: 80,
+                  child: Center(
+                    child: CircularProgressIndicator(),
                   ),
-                )
-              ]
-            ]),
-          );
-        } else {
-          return Container(
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-      }),
-    );
+                ),
+              )
+            ]
+          ]),
+        );
+      } else {
+        return Container(
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+    });
   }
 }
