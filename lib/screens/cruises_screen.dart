@@ -111,12 +111,17 @@ class _SailorsScreenState extends State<SailorsScreen> {
                           Text(
                               'kpt. ${items[index].captain.firstName} ${items[index].captain.lastName}'),
                           Text('Załoga:'),
-                          // ListView.builder(itemBuilder: (context, z) {
-                          //   return ListTile(  //<--------------------- https://www.youtube.com/watch?v=1LGKZsff8bQ
-                          //     title: Text(
-                          //         '${items[index].crew[z].firstName} ${items[index].crew[z].lastName}'),
-                          //   );
-                          // })
+                          ListView.builder(
+                            itemBuilder: (context, z) {
+                              return ListTile(
+                                title: Text(
+                                    '${items[index].crew[z].firstName} ${items[index].crew[z].lastName}'),
+                              );
+                            },
+                            itemCount: items[index].crew.length,
+                            physics: ClampingScrollPhysics(),
+                            shrinkWrap: true,
+                          )
                         ],
                       ),
                     ));
@@ -132,3 +137,4 @@ class _SailorsScreenState extends State<SailorsScreen> {
     });
   }
 }
+

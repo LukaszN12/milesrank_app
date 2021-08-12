@@ -6,7 +6,6 @@ class RankingsModel {
         'https://milesrank-staging.herokuapp.com/api/rankings/simple?pageNo=$pageNo&pageSize=10';
     NetworkHelper networkHelper = NetworkHelper(url);
     var rankingsData = await networkHelper.getData();
-    // print(rankingsData);
     return rankingsData;
   }
 }

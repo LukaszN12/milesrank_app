@@ -27,9 +27,6 @@ class _RankingScreenState extends State<RankingScreen> {
     var rankingData = await rankingsModel.getRankingsDataFromDB(pageNumber);
     List<RankingItem> newData = copyJsonToList(rankingData);
 
-    // List<RankingItem> newData = items.length >= 60
-    //     ? []
-    //     : List.generate(20, (index) => "List Item ${index + items.length}");
     if (newData.isNotEmpty) {
       items.addAll(newData);
     }
@@ -90,7 +87,6 @@ class _RankingScreenState extends State<RankingScreen> {
             title: Text('Ranking'),
             centerTitle: true,
             elevation: 0,
-            // backgroundColor: Color(0xFF5089C6),
           ),
           body: Stack(children: [
             ListView.builder(
@@ -107,7 +103,7 @@ class _RankingScreenState extends State<RankingScreen> {
                         leading: Text(items[index].rank.toString()),
                         title: Text(
                             '${items[index].firstName} ${items[index].lastName}'),
-                        subtitle: Text('miles: ${items[index].miles}'),
+                        subtitle: Text('mile: ${items[index].miles}'),
                       ),
                     ),
                   );
