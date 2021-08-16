@@ -8,4 +8,12 @@ class SearchModel {
     var searchData = await networkHelper.getData();
     return searchData;
   }
+
+  Future<dynamic> getSearchDataFromDBNoPageNo(String query) async {
+    var url =
+        'https://milesrank-staging.herokuapp.com/api/rankings/simple?pageNo=1&pageSize=10&query=$query';
+    NetworkHelper networkHelper = NetworkHelper(url);
+    var searchData = await networkHelper.getData();
+    return searchData;
+  }
 }

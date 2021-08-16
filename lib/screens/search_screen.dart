@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
+import 'package:milesrank_app/services/sailor_item.dart';
+import 'package:milesrank_app/services/search.dart';
+import 'package:milesrank_app/services/searched_item.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -11,6 +14,10 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   static const historyLength = 5;
   List<String> _searchHistory = [];
+  int pageNumber = 1;
+  int totalPages = 1;
+  List<SearchedItem> items = [];
+  bool allLoaded = false;
 
   List<String> filteredSearchHistory = [];
 
@@ -49,8 +56,7 @@ class _SearchScreenState extends State<SearchScreen> {
     addSearchTerm(term);
   }
 
-  FloatingSearchBarController controller =
-      FloatingSearchBarController(); // tu może być błąd
+  FloatingSearchBarController controller = FloatingSearchBarController();
 
   @override
   void initState() {
@@ -65,6 +71,61 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
+  void fetchData(String query) async {
+    if (allLoaded || (pageNumber > totalPages)) {
+      return;
+    }
+
+    if (pageNumber == 1) {
+      SearchModel searchModel = SearchModel();
+      var searchedData = await searchModel.getSearchDataFromDBNoPageNo(query);
+      List<SearchedItem> newList = copyJsonToList(await searchedData);
+      if (newList.isNotEmpty) {
+        items.addAll(newList);
+      }
+      pageNumber++;
+      fetchData(query);
+    } else {
+      SearchModel searchModel = SearchModel();
+      var searchedData =
+          await searchModel.getSearchDataFromDB(pageNumber, query);
+      List<SearchedItem> newList = copyJsonToList(await searchedData);
+      if (newList.isNotEmpty) {
+        items.addAll(newList);
+      }
+      pageNumber++;
+      fetchData(query);
+    }
+  }
+
+  List<SearchedItem> copyJsonToList(dynamic sData) {
+    List<SearchedItem> newList = [];
+    totalPages = sData['totalPagesCount'];
+    int jsonLength = 10;
+
+    if (pageNumber == totalPages) {
+      int totalItems = sData['totalPagesCount'];
+      jsonLength = totalItems % jsonLength;
+    }
+
+    for (int i = 0; i < jsonLength; i++) {
+      newList.add(
+        SearchedItem(
+          rank: sData['items'][i]['rank'],
+          sailor: SailorItem(
+            id: sData['items'][i]['person']['id'],
+            firstName: sData['items'][i]['person']['firstName'],
+            lastName: sData['items'][i]['person']['lastName'],
+          ),
+          miles: sData['items'][i]['miles'],
+          change: sData['items'][i]['change'],
+          debut: sData['items'][i]['debut'],
+        ),
+      );
+    }
+    return newList;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,7 +133,7 @@ class _SearchScreenState extends State<SearchScreen> {
         controller: controller,
         body: FloatingSearchBarScrollNotifier(
           child: SearchResultsListView(
-            searchTerm: selectedTerm,
+            sItems: items,
           ),
         ),
         transition: CircularFloatingSearchBarTransition(),
@@ -94,6 +155,7 @@ class _SearchScreenState extends State<SearchScreen> {
           setState(() {
             addSearchTerm(query);
             selectedTerm = query;
+            fetchData(query);
           });
           controller.close();
         },
@@ -170,16 +232,16 @@ class _SearchScreenState extends State<SearchScreen> {
 }
 
 class SearchResultsListView extends StatelessWidget {
-  final String searchTerm;
+  final List<SearchedItem> sItems;
 
   const SearchResultsListView({
     Key? key,
-    required this.searchTerm,
+    required this.sItems,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (searchTerm == '') {
+    if (sItems.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -202,10 +264,19 @@ class SearchResultsListView extends StatelessWidget {
     return ListView(
       padding: EdgeInsets.only(top: fsb.height + fsb.margins.vertical),
       children: List.generate(
-        50,
-        (index) => ListTile(
-          title: Text('$searchTerm search result'),
-          subtitle: Text(index.toString()),
+        sItems.length,
+        (index) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 10.0),
+          child: Card(
+            elevation: 5.0,
+            child: ListTile(
+              onTap: () {},
+              leading: Text(sItems[index].rank.toString()),
+              title: Text(
+                  '${sItems[index].sailor.firstName}  ${sItems[index].sailor.lastName}'),
+              subtitle: Text('mile: ${sItems[index].miles}'),
+            ),
+          ),
         ),
       ),
     );
